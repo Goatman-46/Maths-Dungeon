@@ -25,7 +25,7 @@
             border: 4px solid #f39c12;
         }
 
-        /* Top HUD */
+   
         #hud {
             display: flex; justify-content: space-between;
             background: #2c3e50; padding: 15px 20px;
@@ -37,14 +37,13 @@
         #hunger-container { width: 150px; height: 20px; background: #c0392b; border-radius: 10px; overflow: hidden; border: 2px solid #fff;}
         #hunger-bar { height: 100%; width: 100%; background: #e74c3c; transition: width 0.3s; }
 
-        /* Screens */
-        .screen { padding: 30px; text-align: center; display: none; min-height: 400px; }
+
+        .screen { padding: 30px; text-align: center; display: none; min-height: 450px; }
         .screen.active { display: block; }
 
         h1 { color: #f1c40f; text-shadow: 2px 2px #d35400; font-size: 2.5rem; margin-top: 0;}
-        h2 { color: #3498db; }
+        h2 { color: #3498db; margin-bottom: 10px; margin-top: 0;}
 
-        /* Dungeon Grid */
         .dungeon-grid {
             display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;
         }
@@ -57,8 +56,34 @@
         .dungeon-btn:hover { background: #af7ac5; }
         .dungeon-btn.boss { grid-column: span 2; background: #e67e22; border-color: #d35400; }
 
-        /* Gameplay Area */
-        #question-box { font-size: 4rem; margin: 20px 0; color: #ecf0f1; text-shadow: 2px 2px #2c3e50; }
+      
+        #monster-arena {
+            font-size: 5rem; height: 100px; margin: 10px 0;
+            display: flex; justify-content: center; align-items: center;
+        }
+  
+        @keyframes idle {
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.05); }
+            100% { transform: translateY(0) scale(1); }
+        }
+        .monster-idle { animation: idle 2s ease-in-out infinite; }
+        
+        @keyframes defeat {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; filter: grayscale(0%); }
+            50% { transform: scale(1.3) rotate(15deg); opacity: 0.8; filter: grayscale(50%); }
+            100% { transform: scale(0) rotate(-20deg); opacity: 0; filter: grayscale(100%); }
+        }
+        .monster-defeated { animation: defeat 0.5s forwards; }
+
+        @keyframes attack {
+            0% { transform: scale(1) translateY(0); }
+            50% { transform: scale(1.3) translateY(20px); }
+            100% { transform: scale(1) translateY(0); }
+        }
+        .monster-attack { animation: attack 0.3s forwards; }
+
+        #question-box { font-size: 3.5rem; margin: 10px 0; color: #ecf0f1; text-shadow: 2px 2px #2c3e50; }
         #answer-input {
             font-size: 2rem; width: 150px; text-align: center;
             border-radius: 10px; border: 3px solid #3498db; padding: 10px;
@@ -66,23 +91,23 @@
         }
         
         #timer-container {
-            width: 100%; height: 25px; background: #7f8c8d; border-radius: 15px;
-            margin: 20px 0; overflow: hidden; border: 3px solid #2c3e50;
+            width: 100%; height: 20px; background: #7f8c8d; border-radius: 15px;
+            margin: 15px 0; overflow: hidden; border: 3px solid #2c3e50;
         }
         #timer-bar { height: 100%; width: 100%; background: #2ecc71; }
 
-        /* Buttons */
+
         .action-btn {
             background: #1abc9c; color: white; border: none; padding: 15px 30px;
             font-size: 1.5rem; border-radius: 15px; cursor: pointer;
-            border-bottom: 5px solid #16a085; font-weight: bold; margin-top: 20px; font-family: inherit;
+            border-bottom: 5px solid #16a085; font-weight: bold; margin-top: 15px; font-family: inherit;
         }
         .action-btn:active { transform: translateY(5px); border-bottom: 0px; }
         .action-btn:disabled { background: #95a5a6; border-color: #7f8c8d; cursor: not-allowed; }
 
         #shop-toggle { background: #f1c40f; border-color: #f39c12; color: #d35400; margin-left: 10px; }
 
-        /* Shop Modal */
+        
         #shop-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(44, 62, 80, 0.95); display: none; flex-direction: column;
@@ -94,7 +119,7 @@
         .shop-item button:hover { background: #27ae60; }
         #close-shop { background: #e74c3c; margin-top: 20px; }
 
-        #feedback { font-size: 1.5rem; height: 30px; margin-top: 10px; font-weight: bold;}
+        #feedback { font-size: 1.3rem; height: 30px; margin-top: 10px; font-weight: bold;}
     </style>
 </head>
 <body>
@@ -108,67 +133,68 @@
                 <div id="hunger-bar"></div>
             </div>
         </div>
-        <button id="shop-toggle" onclick="toggleShop()">🛒 Shop</button>
+        <button id="shop-toggle" class="action-btn" style="margin-top:0; padding: 5px 15px; font-size: 1rem; border-bottom-width: 3px;" onclick="toggleShop()">🛒 Shop</button>
     </div>
 
-    <!-- MAIN MENU -->
     <div id="menu" class="screen active">
         <h1>Math Dungeons</h1>
-        <p>Answer fast, earn coins, don't starve!</p>
+        <p>Answer fast, defeat monsters, don't starve!</p>
         <div class="dungeon-grid">
-            <button class="dungeon-btn" onclick="startDungeon(1, 'Addition')">1. Addition Area</button>
-            <button class="dungeon-btn" onclick="startDungeon(2, 'Subtraction')">2. Subtraction Swamp</button>
-            <button class="dungeon-btn" onclick="startDungeon(3, 'Add & Sub')">3. Mixed Plains (+ -)</button>
-            <button class="dungeon-btn" onclick="startDungeon(4, 'Multiplication')">4. Multiply Mountain</button>
-            <button class="dungeon-btn" onclick="startDungeon(5, 'Division')">5. Division Desert</button>
-            <button class="dungeon-btn" onclick="startDungeon(6, 'Mult & Div')">6. Mixed Cave (x ÷)</button>
-            <button class="dungeon-btn boss" onclick="startDungeon(7, 'All Operations')">7. The Ultimate Boss Castle</button>
+            <button class="dungeon-btn" onclick="startDungeon(1, 'Addition')">1. Slime Area (👾)</button>
+            <button class="dungeon-btn" onclick="startDungeon(2, 'Subtraction')">2. Zombie Swamp (🧟)</button>
+            <button class="dungeon-btn" onclick="startDungeon(3, 'Add & Sub')">3. Bat Plains (🦇)</button>
+            <button class="dungeon-btn" onclick="startDungeon(4, 'Multiplication')">4. Dragon Mount (🐉)</button>
+            <button class="dungeon-btn" onclick="startDungeon(5, 'Division')">5. Ghost Desert (👻)</button>
+            <button class="dungeon-btn" onclick="startDungeon(6, 'Mult & Div')">6. Spider Cave (🕷️)</button>
+            <button class="dungeon-btn boss" onclick="startDungeon(7, 'All Operations')">7. The Boss Castle (😈)</button>
         </div>
     </div>
 
-    <!-- GAMEPLAY SCREEN -->
     <div id="game" class="screen">
         <h2 id="dungeon-title">Dungeon 1</h2>
+        <div id="monster-arena">
+            <div id="monster" class="monster-idle">👾</div>
+        </div>
         <div id="timer-container"><div id="timer-bar"></div></div>
         <div id="question-box">5 + 5 = ?</div>
         <input type="number" id="answer-input" autocomplete="off" placeholder="?">
         <div id="feedback"></div>
-        <button id="next-btn" class="action-btn" onclick="nextQuestion()" style="display:none;">Next Question</button>
-        <button class="action-btn" onclick="quitDungeon()" style="background:#e74c3c; border-color:#c0392b; display: block; margin: 20px auto 0; font-size: 1rem; padding: 10px 20px;">Run Away (Menu)</button>
+        <button id="next-btn" class="action-btn" onclick="nextQuestion()" style="display:none;">Next Monster</button>
+        <button class="action-btn" onclick="quitDungeon()" style="background:#e74c3c; border-color:#c0392b; display: block; margin: 15px auto 0; font-size: 1rem; padding: 10px 20px;">Run Away</button>
     </div>
 
-    <!-- SHOP SCREEN -->
+    
     <div id="shop-screen">
-        <h1>🛒 The Shop</h1>
+        <h1 style="margin-bottom: 10px;">🛒 The Shop</h1>
         <div class="shop-grid">
             <div class="shop-item">
-                <h3>🍏 Small Apple</h3>
-                <p>+10 Hunger</p>
+                <h3 style="margin:0;">🍏 Small Apple</h3>
+                <p style="margin:5px 0;">+10 Hunger</p>
                 <button onclick="buyItem('food', 10, 3)">Buy (3 🪙)</button>
             </div>
             <div class="shop-item">
-                <h3>🍔 Burger</h3>
-                <p>+20 Hunger</p>
+                <h3 style="margin:0;">🍔 Burger</h3>
+                <p style="margin:5px 0;">+20 Hunger</p>
                 <button onclick="buyItem('food', 20, 5)">Buy (5 🪙)</button>
             </div>
             <div class="shop-item">
-                <h3>🍖 Mega Meat</h3>
-                <p>+30 Hunger</p>
+                <h3 style="margin:0;">🍖 Mega Meat</h3>
+                <p style="margin:5px 0;">+30 Hunger</p>
                 <button onclick="buyItem('food', 30, 7)">Buy (7 🪙)</button>
             </div>
             <div class="shop-item">
-                <h3>🧪 Blue Potion</h3>
-                <p>+1s Time Limit</p>
+                <h3 style="margin:0;">🧪 Blue Potion</h3>
+                <p style="margin:5px 0;">+1s Time Limit</p>
                 <button onclick="buyItem('time', 1, 10)">Buy (10 🪙)</button>
             </div>
             <div class="shop-item">
-                <h3>🧪 Purple Potion</h3>
-                <p>+2s Time Limit</p>
+                <h3 style="margin:0;">🧪 Purple Potion</h3>
+                <p style="margin:5px 0;">+2s Time Limit</p>
                 <button onclick="buyItem('time', 2, 18)">Buy (18 🪙)</button>
             </div>
             <div class="shop-item">
-                <h3>🧪 Golden Potion</h3>
-                <p>+3s Time Limit</p>
+                <h3 style="margin:0;">🌟 Golden Potion</h3>
+                <p style="margin:5px 0;">+3s Time Limit</p>
                 <button onclick="buyItem('time', 3, 25)">Buy (25 🪙)</button>
             </div>
         </div>
@@ -177,7 +203,7 @@
 </div>
 
 <script>
-    // --- AUDIO SYSTEM ---
+
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx;
     
@@ -194,22 +220,22 @@
         gain.connect(audioCtx.destination);
         const now = audioCtx.currentTime;
 
-        if (type === 'correct') {
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(400, now);
-            osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+        if (type === 'correct') { // Attack sound
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.exponentialRampToValueAtTime(100, now + 0.2);
             gain.gain.setValueAtTime(0.2, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
             osc.start(now); osc.stop(now + 0.2);
-        } else if (type === 'wrong' || type === 'timeout') {
+        } else if (type === 'wrong' || type === 'timeout') { // Monster hits you
             osc.type = 'sawtooth';
             osc.frequency.setValueAtTime(150, now);
             osc.frequency.exponentialRampToValueAtTime(50, now + 0.3);
-            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.setValueAtTime(0.3, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
             osc.start(now); osc.stop(now + 0.3);
         } else if (type === 'coin') {
-            osc.type = 'square';
+            osc.type = 'sine';
             osc.frequency.setValueAtTime(1200, now);
             osc.frequency.setValueAtTime(1600, now + 0.05);
             gain.gain.setValueAtTime(0.1, now);
@@ -232,12 +258,12 @@
         }
     }
 
-    // --- GAME STATE ---
+    
     let coins = 0;
     let hunger = 50;
     const maxHunger = 50;
-    let baseTime = 5000; // 5 seconds in ms
-    let extraTime = 0; // Potion upgrades in ms
+    let baseTime = 5000; 
+    let extraTime = 0; 
     
     let currentDungeon = 0;
     let currentAnswer = 0;
@@ -247,7 +273,10 @@
     let isWaitingForNext = false;
     let isGameOver = false;
 
-    // DOM Elements
+
+    const monsterSprites = ['👾', '🧟', '🦇', '🐉', '👻', '🕷️', '😈'];
+
+   
     const dom = {
         coinUI: document.getElementById('coin-ui'),
         hungerBar: document.getElementById('hunger-bar'),
@@ -259,10 +288,10 @@
         answerInput: document.getElementById('answer-input'),
         timerBar: document.getElementById('timer-bar'),
         feedback: document.getElementById('feedback'),
-        nextBtn: document.getElementById('next-btn')
+        nextBtn: document.getElementById('next-btn'),
+        monster: document.getElementById('monster')
     };
 
-    // --- GAME LOGIC ---
     function updateHUD() {
         dom.coinUI.innerText = coins;
         const hungerPercent = (hunger / maxHunger) * 100;
@@ -272,11 +301,10 @@
         else dom.hungerBar.style.background = '#e74c3c';
     }
 
-    // Hunger System (1 point every 2.5 seconds)
     function startHunger() {
         if (hungerInterval) clearInterval(hungerInterval);
         hungerInterval = setInterval(() => {
-            if (isGameOver) return;
+            if (isGameOver || dom.menu.classList.contains('active')) return;
             hunger--;
             updateHUD();
             if (hunger <= 0) gameOver("You starved!");
@@ -345,39 +373,43 @@
         dom.answerInput.focus();
         dom.feedback.innerText = '';
         
+      
+        dom.monster.innerText = monsterSprites[currentDungeon - 1];
+        dom.monster.className = 'monster-idle';
+        
         generateMath(currentDungeon);
         startTimer();
     }
 
     function generateMath(level) {
         let op = level;
-        if (level === 3) op = Math.random() > 0.5 ? 1 : 2; // mixed + -
-        if (level === 6) op = Math.random() > 0.5 ? 4 : 5; // mixed * /
-        if (level === 7) op = Math.floor(Math.random() * 4) + 1; // 1 to 4 mapped below
-        if (level === 7 && op === 3) op = 4; // remap 3 to *
-        if (level === 7 && op === 4) op = 5; // remap 4 to /
+        if (level === 3) op = Math.random() > 0.5 ? 1 : 2; 
+        if (level === 6) op = Math.random() > 0.5 ? 4 : 5; 
+        if (level === 7) op = Math.floor(Math.random() * 4) + 1; 
+        if (level === 7 && op === 3) op = 4; 
+        if (level === 7 && op === 4) op = 5; 
 
         let a, b;
         switch(op) {
-            case 1: // Addition
+            case 1:
                 a = Math.floor(Math.random() * 20) + 1;
                 b = Math.floor(Math.random() * 20) + 1;
                 currentAnswer = a + b;
                 dom.questionBox.innerText = `${a} + ${b}`;
                 break;
-            case 2: // Subtraction (Positive answers only)
+            case 2:
                 a = Math.floor(Math.random() * 20) + 10;
                 b = Math.floor(Math.random() * a) + 1; 
                 currentAnswer = a - b;
                 dom.questionBox.innerText = `${a} - ${b}`;
                 break;
-            case 4: // Multiplication
+            case 4:
                 a = Math.floor(Math.random() * 10) + 2;
                 b = Math.floor(Math.random() * 10) + 2;
                 currentAnswer = a * b;
                 dom.questionBox.innerText = `${a} × ${b}`;
                 break;
-            case 5: // Division (Whole numbers only)
+            case 5:
                 b = Math.floor(Math.random() * 10) + 2;
                 currentAnswer = Math.floor(Math.random() * 10) + 2;
                 a = currentAnswer * b;
@@ -394,7 +426,7 @@
         dom.timerBar.style.background = '#2ecc71';
         dom.timerBar.style.width = '100%';
 
-        const updateRate = 50; // Update every 50ms for smooth bar
+        const updateRate = 50;
         timerInterval = setInterval(() => {
             if (isWaitingForNext || isGameOver) return;
             
@@ -423,21 +455,38 @@
             coins++;
             updateHUD();
             playSound('correct');
-            setTimeout(() => playSound('coin'), 200);
+            setTimeout(() => playSound('coin'), 300);
+            
+           
+            dom.monster.className = 'monster-defeated';
+            setTimeout(() => { dom.monster.innerText = '💥'; }, 200);
+
             dom.feedback.innerText = "⭐ Correct! +1 🪙";
             dom.feedback.style.color = '#2ecc71';
         } else {
             playSound(msg === "Timeout!" ? 'timeout' : 'wrong');
-            dom.feedback.innerText = `❌ ${msg} The answer was ${currentAnswer}`;
+     
+            dom.monster.className = 'monster-attack';
+            setTimeout(() => { dom.monster.className = 'monster-idle'; }, 300);
+
+            dom.feedback.innerText = `❌ ${msg} Answer was ${currentAnswer}`;
             dom.feedback.style.color = '#e74c3c';
         }
     }
 
-    // Input Handling
-    dom.answerInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !isWaitingForNext) {
-            const val = parseInt(dom.answerInput.value);
-            if (isNaN(val)) return;
+    
+    dom.answerInput.addEventListener('input', (e) => {
+        if (isWaitingForNext) return;
+        
+        const valStr = dom.answerInput.value.trim();
+        if (valStr === "") return;
+        
+        
+        const targetLength = currentAnswer.toString().length;
+        
+       
+        if (valStr.length >= targetLength) {
+            const val = parseInt(valStr);
             if (val === currentAnswer) {
                 handleAnswer(true);
             } else {
@@ -446,7 +495,23 @@
         }
     });
 
-    // Handle Enter key on the Next button too
+  
+    dom.answerInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !isWaitingForNext) {
+            const valStr = dom.answerInput.value.trim();
+            if (valStr === "") return;
+            
+            const val = parseInt(valStr);
+            if (isNaN(val)) return;
+            
+            if (val === currentAnswer) {
+                handleAnswer(true);
+            } else {
+                handleAnswer(false, "Wrong!");
+            }
+        }
+    });
+
     dom.nextBtn.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             nextQuestion();
